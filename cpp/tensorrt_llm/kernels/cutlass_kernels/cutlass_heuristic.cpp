@@ -53,8 +53,10 @@ TileShape get_cta_shape_for_config(CutlassTileConfig tile_config)
 {
     switch (tile_config)
     {
+    case CutlassTileConfig::CtaShape16x128x64_WarpShape16x32x32:
     case CutlassTileConfig::CtaShape16x128x64_WarpShape16x32x64: return TileShape{16, 128};
     case CutlassTileConfig::CtaShape16x256x64_WarpShape16x64x64: return TileShape{16, 256};
+    case CutlassTileConfig::CtaShape32x128x64_WarpShape32x32x32:
     case CutlassTileConfig::CtaShape32x128x64_WarpShape32x32x64: return TileShape{32, 128};
     case CutlassTileConfig::CtaShape64x64x128_WarpShape32x64x64: return TileShape{64, 64};
     case CutlassTileConfig::CtaShape64x128x64_WarpShape32x64x64:
@@ -149,8 +151,10 @@ std::vector<CutlassTileConfig> get_candidate_tiles(
         if (sm >= 75)
         {
             return {CutlassTileConfig::CtaShape16x128x64_WarpShape16x32x64,
+                CutlassTileConfig::CtaShape16x128x64_WarpShape16x32x32,
                 CutlassTileConfig::CtaShape16x256x64_WarpShape16x64x64,
                 CutlassTileConfig::CtaShape32x128x64_WarpShape32x32x64,
+                CutlassTileConfig::CtaShape32x128x64_WarpShape32x32x32,
                 CutlassTileConfig::CtaShape64x128x64_WarpShape64x32x64,
                 CutlassTileConfig::CtaShape128x128x64_WarpShape128x32x64};
         }

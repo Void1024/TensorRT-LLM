@@ -119,6 +119,7 @@ set(SAMPLING_KERNEL_TEST_SRC
     kernels/sampling/samplingUtilsTest.cu)
 add_gtest(samplingKernelsTest "${SAMPLING_KERNEL_TEST_SRC}")
 add_gtest(weightOnlyKernelTest kernels/weightOnly/weightOnlyKernelTest.cpp)
+add_gtest(benchmark kernels/weightOnly/benchmark.cpp)
 add_gtest(smoothQuantKernelTest kernels/smoothQuant/smoothQuantKernelTest.cpp)
 add_gtest(cudaCoreGemmKernelTest
           kernels/cudaCoreGemm/cudaCoreGemmKernelTest.cpp)

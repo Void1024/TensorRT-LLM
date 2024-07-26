@@ -41,6 +41,8 @@
 #include "tensorrt_llm/kernels/cutlass_kernels/fpA_intB_gemm/fpA_intB_gemm.h"
 #include "tensorrt_llm/kernels/cutlass_kernels/fpA_intB_gemm/fpA_intB_gemm_template_sm90.h"
 
+#include "tensorrt_llm/kernels/cutlass_kernels/fpA_intB_gemm/template_ext/thread_map_ext.h"
+
 namespace tk = tensorrt_llm::common;
 namespace tkc = tensorrt_llm::cutlass_extensions;
 
@@ -347,6 +349,32 @@ void dispatch_gemm_to_cutlass(ActivationType const* A, WeightType const* B, Scal
                     EpilogueTag, cutlass::gemm::GemmShape<16, 128, tile_shape_k>,
                     cutlass::gemm::GemmShape<16, 32, tile_shape_k>>(A, B, weight_scales, weight_zero_points, biases,
                     alpha, C, m, n, k, group_size, gemm_config, workspace, workspace_bytes, stream, occupancy);
+            }
+            break;
+        case tkc::CutlassTileConfig::CtaShape16x128x64_WarpShape16x32x32:
+            TLLM_CHECK_WITH_INFO((arch::kMinComputeCapability == 80 && std::is_same_v<ActivationType, half>
+                                     && std::is_same_v<WeightType, cutlass::uint4b_t> && cutlass::isFinegrained(QuantOp)),
+                "Invalid config");
+            if constexpr (arch::kMinComputeCapability == 80 && std::is_same_v<ActivationType, half>
+                                     && std::is_same_v<WeightType, cutlass::uint4b_t> && cutlass::isFinegrained(QuantOp))
+            {
+                dispatch_gemm_config<ActivationType, WeightType, ScaleZeroType, BiasType, OutputType, arch, QuantOp,
+                    EpilogueTag, cutlass::gemm::GemmShape<16, 128, 64>, cutlass::gemm::GemmShape<16, 32, 32>>(
+                    A, B, weight_scales, weight_zero_points, biases, alpha, C, m, n, k, group_size, gemm_config,
+                    workspace, workspace_bytes, stream, occupancy);
+            }
+            break;
+        case tkc::CutlassTileConfig::CtaShape32x128x64_WarpShape32x32x32:
+            TLLM_CHECK_WITH_INFO((arch::kMinComputeCapability == 80 && std::is_same_v<ActivationType, half>
+                                     && std::is_same_v<WeightType, cutlass::uint4b_t> && cutlass::isFinegrained(QuantOp)),
+                "Invalid config");
+            if constexpr (arch::kMinComputeCapability == 80 && std::is_same_v<ActivationType, half>
+                                     && std::is_same_v<WeightType, cutlass::uint4b_t> && cutlass::isFinegrained(QuantOp))
+            {
+                dispatch_gemm_config<ActivationType, WeightType, ScaleZeroType, BiasType, OutputType, arch, QuantOp,
+                    EpilogueTag, cutlass::gemm::GemmShape<32, 128, 64>, cutlass::gemm::GemmShape<32, 32, 32>>(
+                    A, B, weight_scales, weight_zero_points, biases, alpha, C, m, n, k, group_size, gemm_config,
+                    workspace, workspace_bytes, stream, occupancy);
             }
             break;
         case tkc::CutlassTileConfig::CtaShape16x256x64_WarpShape16x64x64:
